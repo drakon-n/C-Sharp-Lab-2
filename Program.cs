@@ -209,6 +209,144 @@ namespace Lab3
 
     }
     #endregion
+    
+    
+    #region
+  public class SimpleListItem<T> {
+    public T data { get; set; }
+
+    public SimpleListItem<T> next { get; set; }
+
+    public SimpleListItem(T param) {
+      this.data = param;
+    }
+
+  }
+
+  public class SimpleList<T> : IEnumerable<T> where T : IComparable
+  {
+
+      protected SimpleListItem<T> first = null;
+      protected SimpleListItem<T> last = null;
+
+      int _count;
+      public int Count
+      {
+          get { return _count; }
+          protected set { _count = value; }
+      }
+      public void Add(T element)
+      {
+          SimpleListItem<T> newItem = new SimpleListItem<T>(element);
+          this.Count++;
+
+          if (last == null)
+          {
+              this.first = newItem;
+              this.last = newItem;
+          }
+          else
+          {
+              this.last.next = newItem;
+              this.last = newItem;
+          }
+      }
+
+      public SimpleListItem<T> GetItem(int number)
+      {
+          if (number < 0 || number >= this.Count)
+          {
+              throw new Exception("Out of bounds");
+          }
+
+          SimpleListItem<T> current = this.first;
+          for (int i = 0; i < number; i++)
+          {
+              current = current.next;
+          }
+
+          return current;
+      }
+
+      public T Get(int number)
+      {
+          return GetItem(number).data;
+      }
+
+      public IEnumerator<T> GetEnumerator()
+      {
+          SimpleListItem<T> current = this.first;
+
+          while (current != null)
+          {
+              yield return current.data;
+              current = current.next;
+          }
+      }
+
+      public void Sort() { Sort(0, this.Count - 1); }
+      private void Sort(int low, int high)
+      {
+          int i = low;
+          int j = high;
+          T x = Get((low + high) / 2);
+          do
+          {
+              while (Get(i).CompareTo(x) < 0) ++i;
+              while (Get(j).CompareTo(x) > 0) --j;
+              if (i <= j)
+              {
+                  Swap(i, j);
+                  i++;
+                  j--;
+              }
+          } while (i <= j);
+
+          if (low < j) Sort(low, j);
+          if (i < high) Sort(i, high);
+      }
+
+      private void Swap(int i, int j)
+      {
+          SimpleListItem<T> ci = GetItem(i);
+          SimpleListItem<T> cj = GetItem(j);
+          T temp = ci.data;
+          ci.data = cj.data;
+          cj.data = temp;
+      }
+
+      IEnumerator IEnumerable.GetEnumerator()
+      {
+          return GetEnumerator();
+      }
+  }
+
+    class SimpleStack<T>:SimpleList<T> where T:IComparable{
+        public void Push(T cell){Add(cell);}
+        public T Pop(){
+            T cell = default(T);
+           switch (this.Count)
+      {
+          case 0:
+              return cell;
+          case 1:
+             cell = this.first.data;
+                   this.last=null;
+                   this.first=null;
+                   this.Count--;
+                   return cell;
+           
+          default:
+              SimpleListItem<T> Last2 = this.GetItem(this.Count-2);
+                   cell = Last2.next.data;
+                   Last2.next=null;
+                   this.Count--;
+                   return cell;
+      }
+           
+           }
+        }
+#endregion
     interface IPrint
     {
         void Print();
@@ -255,6 +393,15 @@ namespace Lab3
             Console.WriteLine("\nlist<figure> after sorting \n");
             foreach (var x in lf)
                 Console.WriteLine("{0} ", x);
+            
+
+            SparseMatrix<Figure> matrix = new SparseMatrix<Figure>
+                                    (3, 3, 3, new FigureSparseMatrixCheckEmpty());
+            matrix[0, 0, 0] = obj;
+            matrix[1, 0, 0] = obj1;
+            matrix[2, 0, 0] = obj2;
+            Console.WriteLine(matrix.ToString());
+
             Console.Read();
         }
     }
